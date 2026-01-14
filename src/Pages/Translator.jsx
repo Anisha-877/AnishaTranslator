@@ -1,28 +1,28 @@
-import { useState,useEffect } from 'react';
+import { useState } from 'react';
 import Languages from '../Component/Languages';
 import Header from '../Component/Header';
 import { translateText } from '../translate';
-import axios from 'axios';
+
 function Translator() {
   let [text, setText] = useState('');
-  let [storeLanguage, setStoreLanguage] = useState([]);
+  let [storeLanguage] = useState([
+    {code: 'en', name: 'English' },
+    { code: 'hi', name: 'Hindi' },
+    {code:'bn', name:'Bengali' },
+    { code: 'zh', name: 'Chinese' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'it', name: 'Italian' },
+    { code: 'pt', name: 'Portuguese' }
+  ]);
+
   let [selectedLanguage, setSelectedLanguage] = useState('');
   let [translatedText, setTranslatedText] = useState('');
   let [loading, setLoading] = useState(false);
 
 
-  let storeLanguageFun=()=>{
-    axios.get('https://libretranslate.com/languages')
-    .then((res)=>res.data)
-    .then((finalRes)=>{
-      setStoreLanguage(finalRes);
-      console.log(finalRes);
-    }
-  )
-  }
-  useEffect(() => {
-    storeLanguageFun();
-  }, [])
+  
 
 
   let translationFunc = async () => {
