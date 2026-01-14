@@ -1,55 +1,44 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState,useEffect } from 'react';
 import Languages from '../Component/Languages';
 import Header from '../Component/Header';
+import { translateText } from '../translate';
+import axios from 'axios';
 function Translator() {
   let [text, setText] = useState('');
   let [storeLanguage, setStoreLanguage] = useState([]);
   let [selectedLanguage, setSelectedLanguage] = useState('');
   let [translatedText, setTranslatedText] = useState('');
   let [loading, setLoading] = useState(false);
-  let translationFunc = () => {
-  if (text !== "" && selectedLanguage !== "") {
-    setLoading(true);
-    axios.post(
-      "http://localhost:8000/translate",
-      new URLSearchParams({
-        q: text,
-        source: "en",
-        target: selectedLanguage,
-        format: "text"
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      }
-    )
-    .then((res) => {
-      setTranslatedText(res.data.translatedText);
-      console.log(res.data);
-      setText('');
-      setLoading(false);
-    })
-    .catch((err) => {
-      setLoading(false);
-    });
-  }
-  
-};
+
 
   let storeLanguageFun=()=>{
-    axios.get('http://localhost:8000/languages')
+    axios.get('https://libretranslate.com/languages')
     .then((res)=>res.data)
     .then((finalRes)=>{
       setStoreLanguage(finalRes);
       console.log(finalRes);
-    })
-    .catch((err) => {});
+    }
+  )
   }
   useEffect(() => {
     storeLanguageFun();
   }, [])
+
+
+  let translationFunc = async () => {
+    if (text !== "" && selectedLanguage !== "") {
+      setLoading(true);
+      try {
+        const result = await translateText(text, selectedLanguage);
+        setTranslatedText(result);
+        setText('');
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
   
     return (
   <div className="min-h-screen bg-gray-100">
@@ -84,9 +73,10 @@ function Translator() {
 
         <button
           onClick={translationFunc}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition whitespace-nowrap"
+          disabled={loading}
+          className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition whitespace-nowrap disabled:bg-gray-400"
         >
-          Translate
+          {loading ? 'Translating...' : 'Translate'}
         </button>
       </div>
 
@@ -95,7 +85,11 @@ function Translator() {
           Translated Output
         </h2>
         <div className="min-h-[120px] bg-gray-100 rounded-lg p-4 text-gray-800 border border-gray-300">
-          {translatedText || (
+          {loading ? (
+            <span className="text-gray-400">Translating...</span>
+          ) : translatedText ? (
+            translatedText
+          ) : (
             <span className="text-gray-400">
               Translated text will appear here...
             </span>
